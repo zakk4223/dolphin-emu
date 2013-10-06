@@ -556,6 +556,7 @@ void ProgramShaderCache::CreateHeader ( void )
 		
 		// Precision defines for GLSLES2/3
 		"%s\n"
+		"%s\n"
 
 		"\n"// A few required defines and ones that will make our lives a lot easier
 		"#define ATTRIN %s\n"
@@ -587,18 +588,19 @@ void ProgramShaderCache::CreateHeader ( void )
 		"%s\n"
 		"#define COLOROUT(name) %s\n"
 
-				
+
 		, v==GLSLES2 ? "" : v==GLSLES3 ? "#version 300 es" : v==GLSL_130 ? "#version 130" : v==GLSL_140 ? "#version 140" : "#version 150"
 		, g_ActiveConfig.backend_info.bSupportsGLSLUBO && v<GLSL_140 ? "#extension GL_ARB_uniform_buffer_object : enable" : ""
 		, g_ActiveConfig.backend_info.bSupportsEarlyZ ? "#extension GL_ARB_shader_image_load_store : enable" : ""
-		
+
 		, (v==GLSLES3 || v==GLSLES2) ? "precision highp float;" : ""
-		
+		, (v==GLSLES3 || v==GLSLES2) ? "precision highp int;" : ""
+
 		, v==GLSLES2 ? "attribute" : "in"
 		, v==GLSLES2 ? "attribute" : "out"
 		, v==GLSLES2 ? "varying" : DriverDetails::HasBug(DriverDetails::BUG_BROKENCENTROID) ? "in" : "centroid in"
 		, v==GLSLES2 ? "varying" : DriverDetails::HasBug(DriverDetails::BUG_BROKENCENTROID) ? "out" : "centroid out"
-		
+
 		, v==GLSLES2 ? "#define texture2DRect texture2D" : v==GLSLES3 ? "" : v<=GLSL_130 ? "#extension GL_ARB_texture_rectangle : enable" : "#define texture2DRect texture"
 		, v==GLSLES3 ? "#define texture2DRect(samp, uv)  texelFetch(samp, ivec2(floor(uv)), 0)" : ""
 		, (v==GLSLES3 || v==GLSLES2) ? "#define sampler2DRect sampler2D" : ""
