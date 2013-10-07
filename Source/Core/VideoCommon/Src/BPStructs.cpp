@@ -366,7 +366,8 @@ void BPWritten(const BPCmd& bp)
 		break;
 	case BPMEM_BIAS: // BIAS
 		PRIM_LOG("ztex bias=0x%x", bpmem.ztex1.bias);
-		PixelShaderManager::SetZTextureBias(bpmem.ztex1.bias);
+		if(bp.changes)
+			PixelShaderManager::SetZTextureBias(bpmem.ztex1.bias);
 		break;
 	case BPMEM_ZTEX2: // Z Texture type
 		{

@@ -13,8 +13,6 @@
 #include "RenderBase.h"
 static int s_nColorsChanged[2]; // 0 - regular colors, 1 - k colors
 static int s_nIndTexMtxChanged;
-static bool s_bZBiasChanged;
-static bool s_bDepthRangeChanged;
 static bool s_bFogColorChanged;
 static bool s_bFogParamChanged;
 static bool s_bFogRangeAdjustChanged;
@@ -23,7 +21,6 @@ static float lastRGBAfull[2][4][4];
 static u8 s_nTexDimsChanged;
 static u8 s_nIndTexScaleChanged;
 static u32 lastTexDims[8]; // width | height << 16 | wrap_s << 28 | wrap_t << 30
-static u32 lastZBias;
 static int nMaterialsChanged;
 
 PixelShaderConstants PixelShaderManager::constants;
@@ -65,7 +62,6 @@ inline void SetMultiPSConstant4fv(unsigned int const_number, unsigned int count,
 void PixelShaderManager::Init()
 {
 	memset(lastTexDims, 0, sizeof(lastTexDims));
-	lastZBias = 0;
 	memset(lastRGBAfull, 0, sizeof(lastRGBAfull));
 	memset(&constants, 0, sizeof(constants));
 	Dirty();
@@ -77,7 +73,6 @@ void PixelShaderManager::Dirty()
 	s_nTexDimsChanged = 0xFF;
 	s_nIndTexScaleChanged = 0xFF;
 	s_nIndTexMtxChanged = 15;
-	s_bZBiasChanged = s_bDepthRangeChanged = true;
 	s_bFogRangeAdjustChanged = s_bFogColorChanged = s_bFogParamChanged = true;
 	nLightsChanged[0] = 0; nLightsChanged[1] = 0x80;
 	nMaterialsChanged = 15;
@@ -118,21 +113,6 @@ void PixelShaderManager::SetConstants(u32 components)
 			}
         }
     }
-
-	if (s_bZBiasChanged || s_bDepthRangeChanged)
-	{
-		// reversed gxsetviewport(xorig, yorig, width, height, nearz, farz)
-		// [0] = width/2
-		// [1] = height/2
-		// [2] = 16777215 * (farz - nearz)
-		// [3] = xorig + width/2 + 342
-		// [4] = yorig + height/2 + 342
-		// [5] = 16777215 * farz
-
-		//ERROR_LOG("pixel=%x,%x, bias=%x\n", bpmem.zcontrol.pixel_format, bpmem.ztex2.type, lastZBias);
-		SetPSConstant4f(C_ZBIAS+1, xfregs.viewport.farZ / 16777216.0f, xfregs.viewport.zRange / 16777216.0f, 0, (float)(lastZBias)/16777215.0f);
-		s_bZBiasChanged = s_bDepthRangeChanged = false;
-	}
 
 	// indirect incoming texture scales
 	if (s_nIndTexScaleChanged)
@@ -393,16 +373,16 @@ void PixelShaderManager::SetTexDims(int texmapid, u32 width, u32 height, u32 wra
 
 void PixelShaderManager::SetZTextureBias(u32 bias)
 {
-	if (lastZBias != bias)
-	{
-		s_bZBiasChanged = true;
-		lastZBias = bias;
-	}
+	constants.zbias[1][3] = bias/16777215.0f;
+	dirty = true;
 }
 
 void PixelShaderManager::SetViewportChanged()
 {
-	s_bDepthRangeChanged = true;
+	constants.zbias[1][0] = xfregs.viewport.farZ / 16777216.0f;
+	constants.zbias[1][1] = xfregs.viewport.zRange / 16777216.0f;
+	dirty = true;
+	
 	s_bFogRangeAdjustChanged = true; // TODO: Shouldn't be necessary with an accurate fog range adjust implementation
 }
 
@@ -499,7 +479,6 @@ void PixelShaderManager::DoState(PointerWrap &p)
 {
 	p.Do(lastRGBAfull);
 	p.Do(lastTexDims);
-	p.Do(lastZBias);
 	p.Do(constants);
 	p.Do(dirty);
 	
