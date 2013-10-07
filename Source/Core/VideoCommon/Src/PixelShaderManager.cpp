@@ -14,7 +14,6 @@
 static int s_nColorsChanged[2]; // 0 - regular colors, 1 - k colors
 static int s_nIndTexMtxChanged;
 static bool s_bZBiasChanged;
-static bool s_bZTextureTypeChanged;
 static bool s_bDepthRangeChanged;
 static bool s_bFogColorChanged;
 static bool s_bFogParamChanged;
@@ -78,7 +77,7 @@ void PixelShaderManager::Dirty()
 	s_nTexDimsChanged = 0xFF;
 	s_nIndTexScaleChanged = 0xFF;
 	s_nIndTexMtxChanged = 15;
-	s_bZBiasChanged = s_bZTextureTypeChanged = s_bDepthRangeChanged = true;
+	s_bZBiasChanged = s_bDepthRangeChanged = true;
 	s_bFogRangeAdjustChanged = s_bFogColorChanged = s_bFogParamChanged = true;
 	nLightsChanged[0] = 0; nLightsChanged[1] = 0x80;
 	nMaterialsChanged = 15;
@@ -119,28 +118,6 @@ void PixelShaderManager::SetConstants(u32 components)
 			}
         }
     }
-
-	if (s_bZTextureTypeChanged)
-	{
-		float ftemp[4];
-		switch (bpmem.ztex2.type)
-		{
-			 case 0:
-				// 8 bits
-				ftemp[0] = 0; ftemp[1] = 0; ftemp[2] = 0; ftemp[3] = 255.0f/16777215.0f;
-				break;
-			case 1:
-				// 16 bits
-				ftemp[0] = 255.0f/16777215.0f; ftemp[1] = 0; ftemp[2] = 0; ftemp[3] = 65280.0f/16777215.0f;
-				break;
-			case 2:
-				// 24 bits
-				ftemp[0] = 16711680.0f/16777215.0f; ftemp[1] = 65280.0f/16777215.0f; ftemp[2] = 255.0f/16777215.0f; ftemp[3] = 0;
-                break;
-        }
-		SetPSConstant4fv(C_ZBIAS, ftemp);
-		s_bZTextureTypeChanged = false;
-	}
 
 	if (s_bZBiasChanged || s_bDepthRangeChanged)
 	{
@@ -441,7 +418,30 @@ void PixelShaderManager::SetIndMatrixChanged(int matrixidx)
 
 void PixelShaderManager::SetZTextureTypeChanged()
 {
-	s_bZTextureTypeChanged = true;
+	switch (bpmem.ztex2.type)
+	{
+		case TEV_ZTEX_TYPE_U8:
+			constants.zbias[0][0] = 0;
+			constants.zbias[0][1] = 0;
+			constants.zbias[0][2] = 0;
+			constants.zbias[0][3] = 255.0f/16777215.0f;
+			break;
+		case TEV_ZTEX_TYPE_U16:
+			constants.zbias[0][0] = 255.0f/16777215.0f;
+			constants.zbias[0][1] = 0;
+			constants.zbias[0][2] = 0;
+			constants.zbias[0][3] = 65280.0f/16777215.0f;
+			break;
+		case TEV_ZTEX_TYPE_U24:
+			constants.zbias[0][0] = 16711680.0f/16777215.0f;
+			constants.zbias[0][1] = 65280.0f/16777215.0f;
+			constants.zbias[0][2] = 255.0f/16777215.0f;
+			constants.zbias[0][3] = 0;
+			break;
+		default:
+			break;
+        }
+        dirty = true;
 }
 
 void PixelShaderManager::SetTexCoordChanged(u8 texmapid)
