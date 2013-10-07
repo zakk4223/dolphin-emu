@@ -13,7 +13,6 @@
 #include "RenderBase.h"
 static int s_nColorsChanged[2]; // 0 - regular colors, 1 - k colors
 static int s_nIndTexMtxChanged;
-static bool s_bFogColorChanged;
 static bool s_bFogRangeAdjustChanged;
 static int nLightsChanged[2]; // min,max
 static float lastRGBAfull[2][4][4];
@@ -72,7 +71,7 @@ void PixelShaderManager::Dirty()
 	s_nTexDimsChanged = 0xFF;
 	s_nIndTexScaleChanged = 0xFF;
 	s_nIndTexMtxChanged = 15;
-	s_bFogRangeAdjustChanged = s_bFogColorChanged = true;
+	s_bFogRangeAdjustChanged = true;
 	nLightsChanged[0] = 0; nLightsChanged[1] = 0x80;
 	nMaterialsChanged = 15;
 	dirty = true;
@@ -176,12 +175,6 @@ void PixelShaderManager::SetConstants(u32 components)
 				s_nIndTexMtxChanged &= ~(1 << i);
 			}
         }
-    }
-
-    if (s_bFogColorChanged)
-	{
-		SetPSConstant4f(C_FOG, bpmem.fog.color.r / 255.0f, bpmem.fog.color.g / 255.0f, bpmem.fog.color.b / 255.0f, 0);
-		s_bFogColorChanged = false;
     }
 
 	if (s_bFogRangeAdjustChanged)
@@ -414,7 +407,10 @@ void PixelShaderManager::SetTexCoordChanged(u8 texmapid)
 
 void PixelShaderManager::SetFogColorChanged()
 {
-	s_bFogColorChanged = true;
+	constants.fog[0][0] = bpmem.fog.color.r / 255.0f;
+	constants.fog[0][1] = bpmem.fog.color.g / 255.0f;
+	constants.fog[0][2] = bpmem.fog.color.b / 255.0f;
+	dirty = true;
 }
 
 void PixelShaderManager::SetFogParamChanged()

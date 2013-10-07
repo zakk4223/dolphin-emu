@@ -353,7 +353,7 @@ void BPWritten(const BPCmd& bp)
 			PixelShaderManager::SetFogParamChanged();
 		break;
 	case BPMEM_FOGCOLOR: // Fog Color
-		if (!GetConfig(CONFIG_DISABLEFOG))
+		if (!GetConfig(CONFIG_DISABLEFOG) && bp.changes)
 			PixelShaderManager::SetFogColorChanged();
 		break;
 	case BPMEM_ALPHACOMPARE: // Compare Alpha Values
