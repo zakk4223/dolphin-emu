@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="DebugFast|Win32">
@@ -109,7 +109,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugFast|x64'" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\Core\Src;..\Common\Src;..\..\..\Externals;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Core;..\Common;..\..\..\Externals;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -121,7 +121,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\Core\Src;..\Common\Src;..\..\..\Externals;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Core;..\Common;..\..\..\Externals;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -133,7 +133,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\Core\Src;..\Common\Src;..\..\..\Externals;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Core;..\Common;..\..\..\Externals;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -147,7 +147,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugFast|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\Core\Src;..\Common\Src;..\..\..\Externals;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Core;..\Common;..\..\..\Externals;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -161,7 +161,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\Core\Src;..\Common\Src;..\..\..\Externals;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Core;..\Common;..\..\..\Externals;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -175,7 +175,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugFast|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\Core\Src;..\Common\Src;..\..\..\Externals;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Core;..\Common;..\..\..\Externals;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -188,29 +188,29 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Src\aldlist.cpp" />
-    <ClCompile Include="Src\AOSoundStream.cpp" />
-    <ClCompile Include="Src\AudioCommon.cpp" />
-    <ClCompile Include="Src\DPL2Decoder.cpp" />
-    <ClCompile Include="Src\DSoundStream.cpp" />
-    <ClCompile Include="Src\Mixer.cpp" />
-    <ClCompile Include="Src\NullSoundStream.cpp" />
-    <ClCompile Include="Src\OpenALStream.cpp" />
-    <ClCompile Include="Src\WaveFile.cpp" />
-    <ClCompile Include="Src\XAudio2Stream.cpp" />
+    <ClCompile Include="aldlist.cpp" />
+    <ClCompile Include="AOSoundStream.cpp" />
+    <ClCompile Include="AudioCommon.cpp" />
+    <ClCompile Include="DPL2Decoder.cpp" />
+    <ClCompile Include="DSoundStream.cpp" />
+    <ClCompile Include="Mixer.cpp" />
+    <ClCompile Include="NullSoundStream.cpp" />
+    <ClCompile Include="OpenALStream.cpp" />
+    <ClCompile Include="WaveFile.cpp" />
+    <ClCompile Include="XAudio2Stream.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Src\aldlist.h" />
-    <ClInclude Include="Src\AOSoundStream.h" />
-    <ClInclude Include="Src\AudioCommon.h" />
-    <ClInclude Include="Src\DPL2Decoder.h" />
-    <ClInclude Include="Src\DSoundStream.h" />
-    <ClInclude Include="Src\Mixer.h" />
-    <ClInclude Include="Src\NullSoundStream.h" />
-    <ClInclude Include="Src\OpenALStream.h" />
-    <ClInclude Include="Src\SoundStream.h" />
-    <ClInclude Include="Src\WaveFile.h" />
-    <ClInclude Include="Src\XAudio2Stream.h" />
+    <ClInclude Include="aldlist.h" />
+    <ClInclude Include="AOSoundStream.h" />
+    <ClInclude Include="AudioCommon.h" />
+    <ClInclude Include="DPL2Decoder.h" />
+    <ClInclude Include="DSoundStream.h" />
+    <ClInclude Include="Mixer.h" />
+    <ClInclude Include="NullSoundStream.h" />
+    <ClInclude Include="OpenALStream.h" />
+    <ClInclude Include="SoundStream.h" />
+    <ClInclude Include="WaveFile.h" />
+    <ClInclude Include="XAudio2Stream.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="CMakeLists.txt" />

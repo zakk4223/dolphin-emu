@@ -487,16 +487,16 @@ endif()
 ########################################
 # Setup include directories (and make sure they are preferred over the Externals)
 #
-include_directories(Source/Core/AudioCommon/Src)
-include_directories(Source/Core/Common/Src)
-include_directories(Source/Core/Core/Src)
-include_directories(Source/Core/DebuggerUICommon/Src)
-include_directories(Source/Core/DebuggerWX/Src)
-include_directories(Source/Core/DiscIO/Src)
-include_directories(Source/Core/DolphinWX/Src)
-include_directories(Source/Core/InputCommon/Src)
-include_directories(Source/Core/VideoCommon/Src)
-include_directories(Source/Core/VideoUICommon/Src)
+include_directories(Source/Core/AudioCommon)
+include_directories(Source/Core/Common)
+include_directories(Source/Core/Core)
+include_directories(Source/Core/DebuggerUICommon)
+include_directories(Source/Core/DebuggerWX)
+include_directories(Source/Core/DiscIO)
+include_directories(Source/Core/DolphinWX)
+include_directories(Source/Core/InputCommon)
+include_directories(Source/Core/VideoCommon)
+include_directories(Source/Core/VideoUICommon)
 
 ########################################
 # Process externals and setup their include directories
@@ -506,7 +506,7 @@ include_directories(Source/Core/VideoUICommon/Src)
 #   - make sure to tell cmake to link them statically or dynamically (most
 #     should be linked statically)
 #   - place the CMakeLists.txt in the first-level subdirectory, e.g.
-#     Externals/CLRun/CMakeLists.txt (that is: NOT in some Src/ subdirectory)
+#     Externals/CLRun/CMakeLists.txt
 #
 add_subdirectory(Externals/Bochs_disasm)
 include_directories(Externals/Bochs_disasm)
@@ -759,13 +759,13 @@ else()
 	set(DOLPHIN_WC_IS_MASTER "0")
 endif()
 
-file(WRITE ${PROJECT_BINARY_DIR}/Source/Core/Common/Src/scmrev.h
+file(WRITE ${PROJECT_BINARY_DIR}/Source/Core/Common/scmrev.h
 	"#define SCM_REV_STR \"" ${DOLPHIN_WC_REVISION} "\"\n"
 	"#define SCM_DESC_STR \"" ${DOLPHIN_WC_DESCRIBE} "\"\n"
 	"#define SCM_BRANCH_STR \"" ${DOLPHIN_WC_BRANCH} "\"\n"
 	"#define SCM_IS_MASTER " ${DOLPHIN_WC_IS_MASTER} "\n"
 	)
-include_directories("${PROJECT_BINARY_DIR}/Source/Core/Common/Src")
+include_directories("${PROJECT_BINARY_DIR}/Source/Core/Common")
 
 
 ########################################

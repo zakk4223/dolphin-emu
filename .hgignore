@@ -16,7 +16,7 @@ Binary
 */x64/Debug
 Source/ipch
 BuildLog.htm
-Source/Core/Common/Src/svnrev.h
+Source/Core/Common/svnrev.h
 Externals/wxWidgets/build/msw/*/Release
 Externals/wxWidgets/build/msw/*/DebugFast
 Externals/wxWidgets/build/msw/*/Debug

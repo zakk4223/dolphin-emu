@@ -28,7 +28,7 @@ obj/
 _ReSharper*/
 [Tt]est[Rr]esult*
 Binary
-Source/Core/Common/Src/scmrev.h
+Source/Core/Common/scmrev.h
 *.opensdf
 *.sdf
 [Bb]uild
