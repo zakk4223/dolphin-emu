@@ -11,11 +11,9 @@
 #include "VideoConfig.h"
 
 #include "RenderBase.h"
-static int s_nColorsChanged[2]; // 0 - regular colors, 1 - k colors
 static int s_nIndTexMtxChanged;
 static bool s_bFogRangeAdjustChanged;
 static int nLightsChanged[2]; // min,max
-static float lastRGBAfull[2][4][4];
 static u8 s_nTexDimsChanged;
 static u8 s_nIndTexScaleChanged;
 static u32 lastTexDims[8]; // width | height << 16 | wrap_s << 28 | wrap_t << 30
@@ -60,14 +58,12 @@ inline void SetMultiPSConstant4fv(unsigned int const_number, unsigned int count,
 void PixelShaderManager::Init()
 {
 	memset(lastTexDims, 0, sizeof(lastTexDims));
-	memset(lastRGBAfull, 0, sizeof(lastRGBAfull));
 	memset(&constants, 0, sizeof(constants));
 	Dirty();
 }
 
 void PixelShaderManager::Dirty()
 {
-	s_nColorsChanged[0] = s_nColorsChanged[1] = 15;
 	s_nTexDimsChanged = 0xFF;
 	s_nIndTexScaleChanged = 0xFF;
 	s_nIndTexMtxChanged = 15;
@@ -84,21 +80,6 @@ void PixelShaderManager::Shutdown()
 
 void PixelShaderManager::SetConstants(u32 components)
 {
-	for (int i = 0; i < 2; ++i)
-	{
-		if (s_nColorsChanged[i])
-		{
-			int baseind = i ? C_KCOLORS : C_COLORS;
-			for (int j = 0; j < 4; ++j)
-			{
-				if ((s_nColorsChanged[i] & (1 << j)))
-				{
-					SetPSConstant4fv(baseind+j, &lastRGBAfull[i][j][0]);
-					s_nColorsChanged[i] &= ~(1<<j);
-				}
-			}
-		}
-	}
 
     if (s_nTexDimsChanged)
 	{
@@ -303,25 +284,20 @@ void PixelShaderManager::SetPSTextureDims(int texid)
 // TODO: Conversion should be checked in the context of tev_fixes..
 void PixelShaderManager::SetColorChanged(int type, int num, bool high)
 {
-	float *pf = &lastRGBAfull[type][num][0];
-
+	float4* c = type ? constants.kcolors : constants.colors;
 	if (!high)
 	{
-		int r = bpmem.tevregs[num].low.a;
-		int a = bpmem.tevregs[num].low.b;
-		pf[0] = (float)r * (1.0f / 255.0f);
-		pf[3] = (float)a * (1.0f / 255.0f);
+		c[num][0] = bpmem.tevregs[num].low.a / 255.0f;
+		c[num][3] = bpmem.tevregs[num].low.b / 255.0f;
 	}
 	else
 	{
-		int b = bpmem.tevregs[num].high.a;
-		int g = bpmem.tevregs[num].high.b;
-		pf[1] = (float)g * (1.0f / 255.0f);
-		pf[2] = (float)b * (1.0f / 255.0f);
+		c[num][2] = bpmem.tevregs[num].high.a / 255.0f;
+		c[num][1] = bpmem.tevregs[num].high.b / 255.0f;
 	}
-
-	s_nColorsChanged[type] |= 1 << num;
-	PRIM_LOG("pixel %scolor%d: %f %f %f %f\n", type?"k":"", num, pf[0], pf[1], pf[2], pf[3]);
+	dirty = true;
+	
+	PRIM_LOG("pixel %scolor%d: %f %f %f %f\n", type?"k":"", num, c[num][0], c[num][1], c[num][2], c[num][3]);
 }
 
 void PixelShaderManager::SetAlpha(const AlphaTest& alpha)
@@ -437,12 +413,6 @@ void PixelShaderManager::SetFogRangeAdjustChanged()
 	s_bFogRangeAdjustChanged = true;
 }
 
-void PixelShaderManager::SetColorMatrix(const float* pmatrix)
-{
-	SetMultiPSConstant4fv(C_COLORMATRIX,7,pmatrix);
-	s_nColorsChanged[0] = s_nColorsChanged[1] = 15;
-}
-
 void PixelShaderManager::InvalidateXFRange(int start, int end)
 {
 	if (start < XFMEM_LIGHTS_END && end > XFMEM_LIGHTS)
@@ -470,7 +440,6 @@ void PixelShaderManager::SetMaterialColorChanged(int index)
 
 void PixelShaderManager::DoState(PointerWrap &p)
 {
-	p.Do(lastRGBAfull);
 	p.Do(lastTexDims);
 	p.Do(constants);
 	p.Do(dirty);
