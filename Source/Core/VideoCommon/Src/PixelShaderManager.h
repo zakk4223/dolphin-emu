@@ -41,7 +41,7 @@ public:
 	static void SetFogParamChanged();
 	static void SetFogRangeAdjustChanged();
 	static void InvalidateXFRange(int start, int end);
-	static void SetMaterialColorChanged(int index);
+	static void SetMaterialColorChanged(int index, u32 color);
 	
 	static PixelShaderConstants constants;
 	static bool dirty;

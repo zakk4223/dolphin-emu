@@ -13,7 +13,6 @@
 #include "RenderBase.h"
 static bool s_bFogRangeAdjustChanged;
 static int nLightsChanged[2]; // min,max
-static int nMaterialsChanged;
 
 PixelShaderConstants PixelShaderManager::constants;
 bool PixelShaderManager::dirty;
@@ -61,7 +60,6 @@ void PixelShaderManager::Dirty()
 {
 	s_bFogRangeAdjustChanged = true;
 	nLightsChanged[0] = 0; nLightsChanged[1] = 0x80;
-	nMaterialsChanged = 15;
 	dirty = true;
 }
 
@@ -134,44 +132,6 @@ void PixelShaderManager::SetConstants(u32 components)
 			}
 
 			nLightsChanged[0] = nLightsChanged[1] = -1;
-		}
-
-		if (nMaterialsChanged)
-		{
-			float GC_ALIGNED16(material[4]);
-			float NormalizationCoef = 1 / 255.0f;
-
-			for (int i = 0; i < 2; ++i)
-			{
-				if (nMaterialsChanged & (1 << i))
-				{
-					u32 data = *(xfregs.ambColor + i);
-
-					material[0] = ((data >> 24) & 0xFF) * NormalizationCoef;
-					material[1] = ((data >> 16) & 0xFF) * NormalizationCoef;
-					material[2] = ((data >>  8) & 0xFF) * NormalizationCoef;
-					material[3] = ( data        & 0xFF) * NormalizationCoef;
-
-					SetPSConstant4fv(C_PMATERIALS + i, material);
-				}
-			}
-
-			for (int i = 0; i < 2; ++i)
-			{
-				if (nMaterialsChanged & (1 << (i + 2)))
-				{
-					u32 data = *(xfregs.matColor + i);
-
-					material[0] = ((data >> 24) & 0xFF) * NormalizationCoef;
-					material[1] = ((data >> 16) & 0xFF) * NormalizationCoef;
-					material[2] = ((data >>  8) & 0xFF) * NormalizationCoef;
-					material[3] = ( data        & 0xFF) * NormalizationCoef;
-
-					SetPSConstant4fv(C_PMATERIALS + i + 2, material);
-				}
-			}
-
-			nMaterialsChanged = 0;
 		}
 	}
 }
@@ -362,9 +322,16 @@ void PixelShaderManager::InvalidateXFRange(int start, int end)
 	}
 }
 
-void PixelShaderManager::SetMaterialColorChanged(int index)
+void PixelShaderManager::SetMaterialColorChanged(int index, u32 color)
 {
-	nMaterialsChanged  |= (1 << index);
+	if(g_ActiveConfig.bEnablePixelLighting && g_ActiveConfig.backend_info.bSupportsPixelLighting)
+	{
+		constants.pmaterials[index][0] = ((color >> 24) & 0xFF) / 255.0f;
+		constants.pmaterials[index][1] = ((color >> 16) & 0xFF) / 255.0f;
+		constants.pmaterials[index][2] = ((color >>  8) & 0xFF) / 255.0f;
+		constants.pmaterials[index][3] = ( color        & 0xFF) / 255.0f;
+		dirty = true;
+	}
 }
 
 void PixelShaderManager::DoState(PointerWrap &p)
