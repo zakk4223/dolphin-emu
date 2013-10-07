@@ -220,7 +220,8 @@ void BPWritten(const BPCmd& bp)
 	case BPMEM_CONSTANTALPHA: // Set Destination Alpha
 		{
 			PRIM_LOG("constalpha: alp=%d, en=%d", bpmem.dstalpha.alpha, bpmem.dstalpha.enable);
-			PixelShaderManager::SetDestAlpha(bpmem.dstalpha);
+			if(bp.changes & 0xFF)
+				PixelShaderManager::SetDestAlpha(bpmem.dstalpha);
 			if(bp.changes & 0x100)
 				SetBlendMode();
 			break;
@@ -358,8 +359,10 @@ void BPWritten(const BPCmd& bp)
 	case BPMEM_ALPHACOMPARE: // Compare Alpha Values
 		PRIM_LOG("alphacmp: ref0=%d, ref1=%d, comp0=%d, comp1=%d, logic=%d", bpmem.alpha_test.ref0,
 				bpmem.alpha_test.ref1, bpmem.alpha_test.comp0, bpmem.alpha_test.comp1, bpmem.alpha_test.logic);
-		PixelShaderManager::SetAlpha(bpmem.alpha_test);
-		g_renderer->SetColorMask();
+		if(bp.changes & 0xFFFF)
+			PixelShaderManager::SetAlpha(bpmem.alpha_test);
+		if(bp.changes)
+			g_renderer->SetColorMask();
 		break;
 	case BPMEM_BIAS: // BIAS
 		PRIM_LOG("ztex bias=0x%x", bpmem.ztex1.bias);

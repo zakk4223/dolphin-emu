@@ -13,7 +13,6 @@
 #include "RenderBase.h"
 static int s_nColorsChanged[2]; // 0 - regular colors, 1 - k colors
 static int s_nIndTexMtxChanged;
-static bool s_bAlphaChanged;
 static bool s_bZBiasChanged;
 static bool s_bZTextureTypeChanged;
 static bool s_bDepthRangeChanged;
@@ -24,7 +23,6 @@ static int nLightsChanged[2]; // min,max
 static float lastRGBAfull[2][4][4];
 static u8 s_nTexDimsChanged;
 static u8 s_nIndTexScaleChanged;
-static u32 lastAlpha;
 static u32 lastTexDims[8]; // width | height << 16 | wrap_s << 28 | wrap_t << 30
 static u32 lastZBias;
 static int nMaterialsChanged;
@@ -67,7 +65,6 @@ inline void SetMultiPSConstant4fv(unsigned int const_number, unsigned int count,
 
 void PixelShaderManager::Init()
 {
-	lastAlpha = 0;
 	memset(lastTexDims, 0, sizeof(lastTexDims));
 	lastZBias = 0;
 	memset(lastRGBAfull, 0, sizeof(lastRGBAfull));
@@ -81,7 +78,7 @@ void PixelShaderManager::Dirty()
 	s_nTexDimsChanged = 0xFF;
 	s_nIndTexScaleChanged = 0xFF;
 	s_nIndTexMtxChanged = 15;
-	s_bAlphaChanged = s_bZBiasChanged = s_bZTextureTypeChanged = s_bDepthRangeChanged = true;
+	s_bZBiasChanged = s_bZTextureTypeChanged = s_bDepthRangeChanged = true;
 	s_bFogRangeAdjustChanged = s_bFogColorChanged = s_bFogParamChanged = true;
 	nLightsChanged[0] = 0; nLightsChanged[1] = 0x80;
 	nMaterialsChanged = 15;
@@ -121,12 +118,6 @@ void PixelShaderManager::SetConstants(u32 components)
 				s_nTexDimsChanged &= ~(1<<i);
 			}
         }
-    }
-
-    if (s_bAlphaChanged)
-	{
-		SetPSConstant4f(C_ALPHA, (lastAlpha&0xff)/255.0f, ((lastAlpha>>8)&0xff)/255.0f, 0, ((lastAlpha>>16)&0xff)/255.0f);
-		s_bAlphaChanged = false;
     }
 
 	if (s_bZTextureTypeChanged)
@@ -402,20 +393,15 @@ void PixelShaderManager::SetColorChanged(int type, int num, bool high)
 
 void PixelShaderManager::SetAlpha(const AlphaTest& alpha)
 {
-	if ((alpha.hex & 0xffff) != lastAlpha)
-	{
-		lastAlpha = (lastAlpha & ~0xffff) | (alpha.hex & 0xffff);
-		s_bAlphaChanged = true;
-	}
+	constants.alpha[0] = alpha.ref0 / 255.0f;
+	constants.alpha[1] = alpha.ref1 / 255.0f;
+	dirty = true;
 }
 
 void PixelShaderManager::SetDestAlpha(const ConstantAlpha& alpha)
 {
-	if (alpha.alpha != (lastAlpha >> 16))
-	{
-		lastAlpha = (lastAlpha & ~0xff0000) | ((alpha.hex & 0xff) << 16);
-		s_bAlphaChanged = true;
-	}
+	constants.alpha[3] = alpha.alpha;
+	dirty = true;
 }
 
 void PixelShaderManager::SetTexDims(int texmapid, u32 width, u32 height, u32 wraps, u32 wrapt)
@@ -512,7 +498,6 @@ void PixelShaderManager::SetMaterialColorChanged(int index)
 void PixelShaderManager::DoState(PointerWrap &p)
 {
 	p.Do(lastRGBAfull);
-	p.Do(lastAlpha);
 	p.Do(lastTexDims);
 	p.Do(lastZBias);
 	p.Do(constants);
