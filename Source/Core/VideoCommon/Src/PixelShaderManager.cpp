@@ -14,9 +14,7 @@
 static int s_nIndTexMtxChanged;
 static bool s_bFogRangeAdjustChanged;
 static int nLightsChanged[2]; // min,max
-static u8 s_nTexDimsChanged;
 static u8 s_nIndTexScaleChanged;
-static u32 lastTexDims[8]; // width | height << 16 | wrap_s << 28 | wrap_t << 30
 static int nMaterialsChanged;
 
 PixelShaderConstants PixelShaderManager::constants;
@@ -57,14 +55,12 @@ inline void SetMultiPSConstant4fv(unsigned int const_number, unsigned int count,
 
 void PixelShaderManager::Init()
 {
-	memset(lastTexDims, 0, sizeof(lastTexDims));
 	memset(&constants, 0, sizeof(constants));
 	Dirty();
 }
 
 void PixelShaderManager::Dirty()
 {
-	s_nTexDimsChanged = 0xFF;
 	s_nIndTexScaleChanged = 0xFF;
 	s_nIndTexMtxChanged = 15;
 	s_bFogRangeAdjustChanged = true;
@@ -80,19 +76,6 @@ void PixelShaderManager::Shutdown()
 
 void PixelShaderManager::SetConstants(u32 components)
 {
-
-    if (s_nTexDimsChanged)
-	{
-		for (int i = 0; i < 8; ++i)
-		{
-            if ((s_nTexDimsChanged & (1<<i)))
-			{
-				SetPSTextureDims(i);
-				s_nTexDimsChanged &= ~(1<<i);
-			}
-        }
-    }
-
 	// indirect incoming texture scales
 	if (s_nIndTexScaleChanged)
 	{
@@ -262,22 +245,6 @@ void PixelShaderManager::SetConstants(u32 components)
 	}
 }
 
-void PixelShaderManager::SetPSTextureDims(int texid)
-{
-	// texdims.xy are reciprocals of the real texture dimensions
-	// texdims.zw are the scaled dimensions
-	float fdims[4];
-
-	TCoordInfo& tc = bpmem.texcoords[texid];
-	fdims[0] = 1.0f / (float)(lastTexDims[texid] & 0xffff);
-	fdims[1] = 1.0f / (float)((lastTexDims[texid] >> 16) & 0xfff);
-	fdims[2] = (float)(tc.s.scale_minus_1 + 1);
-	fdims[3] = (float)(tc.t.scale_minus_1 + 1);
-
-	PRIM_LOG("texdims%d: %f %f %f %f\n", texid, fdims[0], fdims[1], fdims[2], fdims[3]);
-	SetPSConstant4fv(C_TEXDIMS + texid, fdims);
-}
-
 // This one is high in profiles (0.5%).
 // TODO: Move conversion out, only store the raw color value
 // and update it when the shader constant is set, only.
@@ -315,12 +282,13 @@ void PixelShaderManager::SetDestAlpha(const ConstantAlpha& alpha)
 
 void PixelShaderManager::SetTexDims(int texmapid, u32 width, u32 height, u32 wraps, u32 wrapt)
 {
-	u32 wh = width | (height << 16) | (wraps << 28) | (wrapt << 30);
-	if (lastTexDims[texmapid] != wh)
-	{
-		lastTexDims[texmapid] = wh;
-		s_nTexDimsChanged |= 1 << texmapid;
-	}
+	// TODO: move this check out to callee. There we could just call this function on texture changes
+	// or better, use textureSize() in glsl
+	if(constants.texdims[texmapid][0] != 1.0f/width || constants.texdims[texmapid][1] != 1.0f/height)
+		dirty = true;
+	
+	constants.texdims[texmapid][0] = 1.0f/width;
+	constants.texdims[texmapid][1] = 1.0f/height;
 }
 
 void PixelShaderManager::SetZTextureBias(u32 bias)
@@ -378,7 +346,10 @@ void PixelShaderManager::SetZTextureTypeChanged()
 
 void PixelShaderManager::SetTexCoordChanged(u8 texmapid)
 {
-	s_nTexDimsChanged |= 1 << texmapid;
+	TCoordInfo& tc = bpmem.texcoords[texmapid];
+        constants.texdims[texmapid][2] = tc.s.scale_minus_1 + 1;
+	constants.texdims[texmapid][3] = tc.t.scale_minus_1 + 1;
+	dirty = true;
 }
 
 void PixelShaderManager::SetFogColorChanged()
@@ -440,7 +411,6 @@ void PixelShaderManager::SetMaterialColorChanged(int index)
 
 void PixelShaderManager::DoState(PointerWrap &p)
 {
-	p.Do(lastTexDims);
 	p.Do(constants);
 	p.Do(dirty);
 	

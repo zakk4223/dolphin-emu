@@ -17,7 +17,6 @@ class PointerWrap;
 // The non-API dependent parts.
 class PixelShaderManager
 {
-	static void SetPSTextureDims(int texid);
 public:
 	static void Init();
 	static void Dirty();

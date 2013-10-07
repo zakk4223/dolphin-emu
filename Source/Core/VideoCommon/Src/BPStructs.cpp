@@ -577,7 +577,8 @@ void BPWritten(const BPCmd& bp)
 		case BPMEM_SU_TSIZE+12:
 		case BPMEM_SU_SSIZE+14:
 		case BPMEM_SU_TSIZE+14:
-			PixelShaderManager::SetTexCoordChanged((bp.address - BPMEM_SU_SSIZE) >> 1);
+			if(bp.changes)
+				PixelShaderManager::SetTexCoordChanged((bp.address - BPMEM_SU_SSIZE) >> 1);
 			break;
 		// ------------------------
 		// BPMEM_TX_SETMODE0 - (Texture lookup and filtering mode) LOD/BIAS Clamp, MaxAnsio, LODBIAS, DiagLoad, Min Filter, Mag Filter, Wrap T, S
