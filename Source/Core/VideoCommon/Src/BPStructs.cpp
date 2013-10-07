@@ -349,7 +349,7 @@ void BPWritten(const BPCmd& bp)
 	case BPMEM_FOGBMAGNITUDE:
 	case BPMEM_FOGBEXPONENT:
 	case BPMEM_FOGPARAM3:
-		if (!GetConfig(CONFIG_DISABLEFOG))
+		if (!GetConfig(CONFIG_DISABLEFOG) && bp.changes)
 			PixelShaderManager::SetFogParamChanged();
 		break;
 	case BPMEM_FOGCOLOR: // Fog Color

@@ -14,7 +14,6 @@
 static int s_nColorsChanged[2]; // 0 - regular colors, 1 - k colors
 static int s_nIndTexMtxChanged;
 static bool s_bFogColorChanged;
-static bool s_bFogParamChanged;
 static bool s_bFogRangeAdjustChanged;
 static int nLightsChanged[2]; // min,max
 static float lastRGBAfull[2][4][4];
@@ -73,7 +72,7 @@ void PixelShaderManager::Dirty()
 	s_nTexDimsChanged = 0xFF;
 	s_nIndTexScaleChanged = 0xFF;
 	s_nIndTexMtxChanged = 15;
-	s_bFogRangeAdjustChanged = s_bFogColorChanged = s_bFogParamChanged = true;
+	s_bFogRangeAdjustChanged = s_bFogColorChanged = true;
 	nLightsChanged[0] = 0; nLightsChanged[1] = 0x80;
 	nMaterialsChanged = 15;
 	dirty = true;
@@ -183,22 +182,6 @@ void PixelShaderManager::SetConstants(u32 components)
 	{
 		SetPSConstant4f(C_FOG, bpmem.fog.color.r / 255.0f, bpmem.fog.color.g / 255.0f, bpmem.fog.color.b / 255.0f, 0);
 		s_bFogColorChanged = false;
-    }
-
-    if (s_bFogParamChanged)
-	{
-		if(!g_ActiveConfig.bDisableFog)
-		{
-			//downscale magnitude to 0.24 bits
-			float b = (float)bpmem.fog.b_magnitude / 0xFFFFFF;
-
-			float b_shf = (float)(1 << bpmem.fog.b_shift);
-			SetPSConstant4f(C_FOG + 1, bpmem.fog.a.GetA(), b, bpmem.fog.c_proj_fsel.GetC(), b_shf);
-		}
-		else
-			SetPSConstant4f(C_FOG + 1, 0.0, 1.0, 0.0, 1.0);
-
-        s_bFogParamChanged = false;
     }
 
 	if (s_bFogRangeAdjustChanged)
@@ -436,7 +419,21 @@ void PixelShaderManager::SetFogColorChanged()
 
 void PixelShaderManager::SetFogParamChanged()
 {
-	s_bFogParamChanged = true;
+	if(!g_ActiveConfig.bDisableFog)
+	{
+		constants.fog[1][0] = bpmem.fog.a.GetA();
+		constants.fog[1][1] = (float)bpmem.fog.b_magnitude / 0xFFFFFF;
+		constants.fog[1][2] = bpmem.fog.c_proj_fsel.GetC();
+		constants.fog[1][3] = 1 << bpmem.fog.b_shift;
+	}
+	else
+	{
+		constants.fog[1][0] = 0;
+		constants.fog[1][1] = 1;
+		constants.fog[1][2] = 0;
+		constants.fog[1][3] = 1;
+	}
+	dirty = true;
 }
 
 void PixelShaderManager::SetFogRangeAdjustChanged()
