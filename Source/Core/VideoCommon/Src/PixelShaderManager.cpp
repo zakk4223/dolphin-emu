@@ -11,10 +11,8 @@
 #include "VideoConfig.h"
 
 #include "RenderBase.h"
-static int s_nIndTexMtxChanged;
 static bool s_bFogRangeAdjustChanged;
 static int nLightsChanged[2]; // min,max
-static u8 s_nIndTexScaleChanged;
 static int nMaterialsChanged;
 
 PixelShaderConstants PixelShaderManager::constants;
@@ -61,8 +59,6 @@ void PixelShaderManager::Init()
 
 void PixelShaderManager::Dirty()
 {
-	s_nIndTexScaleChanged = 0xFF;
-	s_nIndTexMtxChanged = 15;
 	s_bFogRangeAdjustChanged = true;
 	nLightsChanged[0] = 0; nLightsChanged[1] = 0x80;
 	nMaterialsChanged = 15;
@@ -76,71 +72,6 @@ void PixelShaderManager::Shutdown()
 
 void PixelShaderManager::SetConstants(u32 components)
 {
-	// indirect incoming texture scales
-	if (s_nIndTexScaleChanged)
-	{
-		// set as two sets of vec4s, each containing S and T of two ind stages.
-		float f[8];
-
-        if (s_nIndTexScaleChanged & 0x03)
-		{
-			for (u32 i = 0; i < 2; ++i)
-			{
-                f[2 * i] = bpmem.texscale[0].getScaleS(i & 1);
-                f[2 * i + 1] = bpmem.texscale[0].getScaleT(i & 1);
-                PRIM_LOG("tex indscale%d: %f %f\n", i, f[2 * i], f[2 * i + 1]);
-            }
-			SetPSConstant4fv(C_INDTEXSCALE, f);
-        }
-
-		if (s_nIndTexScaleChanged & 0x0c)
-		{
-            for (u32 i = 2; i < 4; ++i)
-			{
-                f[2 * i] = bpmem.texscale[1].getScaleS(i & 1);
-                f[2 * i + 1] = bpmem.texscale[1].getScaleT(i & 1);
-                PRIM_LOG("tex indscale%d: %f %f\n", i, f[2 * i], f[2 * i + 1]);
-            }
-			SetPSConstant4fv(C_INDTEXSCALE+1, &f[4]);
-        }
-		s_nIndTexScaleChanged = 0;
-    }
-
-	if (s_nIndTexMtxChanged)
-	{
-		for (int i = 0; i < 3; ++i)
-		{
-            if (s_nIndTexMtxChanged & (1 << i))
-			{
-                int scale = ((u32)bpmem.indmtx[i].col0.s0 << 0) |
-					        ((u32)bpmem.indmtx[i].col1.s1 << 2) |
-					        ((u32)bpmem.indmtx[i].col2.s2 << 4);
-                float fscale = powf(2.0f, (float)(scale - 17)) / 1024.0f;
-
-                // xyz - static matrix
-                // TODO w - dynamic matrix scale / 256...... somehow / 4 works better
-                // rev 2972 - now using / 256.... verify that this works
-				SetPSConstant4f(C_INDTEXMTX + 2 * i,
-					bpmem.indmtx[i].col0.ma * fscale,
-					bpmem.indmtx[i].col1.mc * fscale,
-					bpmem.indmtx[i].col2.me * fscale,
-					fscale * 4.0f);
-				SetPSConstant4f(C_INDTEXMTX + 2 * i + 1,
-					bpmem.indmtx[i].col0.mb * fscale,
-					bpmem.indmtx[i].col1.md * fscale,
-					bpmem.indmtx[i].col2.mf * fscale,
-					fscale * 4.0f);
-
-                PRIM_LOG("indmtx%d: scale=%f, mat=(%f %f %f; %f %f %f)\n",
-                	i, 1024.0f*fscale,
-                	bpmem.indmtx[i].col0.ma * fscale, bpmem.indmtx[i].col1.mc * fscale, bpmem.indmtx[i].col2.me * fscale,
-                	bpmem.indmtx[i].col0.mb * fscale, bpmem.indmtx[i].col1.md * fscale, bpmem.indmtx[i].col2.mf * fscale);
-
-				s_nIndTexMtxChanged &= ~(1 << i);
-			}
-        }
-    }
-
 	if (s_bFogRangeAdjustChanged)
 	{
 		if(!g_ActiveConfig.bDisableFog && bpmem.fogRange.Base.Enabled == 1)
@@ -308,12 +239,39 @@ void PixelShaderManager::SetViewportChanged()
 
 void PixelShaderManager::SetIndTexScaleChanged(u8 stagemask)
 {
-	s_nIndTexScaleChanged |= stagemask;
+	bool high_stage = stagemask == 0x0c;
+	constants.indtexscale[high_stage][0] = bpmem.texscale[high_stage].getScaleS(0);
+	constants.indtexscale[high_stage][1] = bpmem.texscale[high_stage].getScaleT(0);
+	constants.indtexscale[high_stage][2] = bpmem.texscale[high_stage].getScaleS(1);
+	constants.indtexscale[high_stage][3] = bpmem.texscale[high_stage].getScaleT(1);
+	dirty = true;
 }
 
 void PixelShaderManager::SetIndMatrixChanged(int matrixidx)
 {
-	s_nIndTexMtxChanged |= 1 << matrixidx;
+	int scale = ((u32)bpmem.indmtx[matrixidx].col0.s0 << 0) |
+			((u32)bpmem.indmtx[matrixidx].col1.s1 << 2) |
+			((u32)bpmem.indmtx[matrixidx].col2.s2 << 4);
+	float fscale = powf(2.0f, (float)(scale - 17)) / 1024.0f;
+
+	// xyz - static matrix
+	// TODO w - dynamic matrix scale / 256...... somehow / 4 works better
+	// rev 2972 - now using / 256.... verify that this works
+	constants.indtexmts[2*matrixidx][0] = bpmem.indmtx[matrixidx].col0.ma * fscale;
+	constants.indtexmts[2*matrixidx][1] = bpmem.indmtx[matrixidx].col1.mc * fscale;
+	constants.indtexmts[2*matrixidx][2] = bpmem.indmtx[matrixidx].col2.me * fscale;
+	constants.indtexmts[2*matrixidx][3] = fscale * 4.0f;
+	constants.indtexmts[2*matrixidx+1][0] = bpmem.indmtx[matrixidx].col0.mb * fscale;
+	constants.indtexmts[2*matrixidx+1][1] = bpmem.indmtx[matrixidx].col1.md * fscale;
+	constants.indtexmts[2*matrixidx+1][2] = bpmem.indmtx[matrixidx].col2.mf * fscale;
+	constants.indtexmts[2*matrixidx+1][3] = fscale * 4.0f;
+	dirty = true;
+
+	PRIM_LOG("indmtx%d: scale=%f, mat=(%f %f %f; %f %f %f)\n",
+			matrixidx, 1024.0f*fscale,
+			bpmem.indmtx[matrixidx].col0.ma * fscale, bpmem.indmtx[matrixidx].col1.mc * fscale, bpmem.indmtx[matrixidx].col2.me * fscale,
+		bpmem.indmtx[matrixidx].col0.mb * fscale, bpmem.indmtx[matrixidx].col1.md * fscale, bpmem.indmtx[matrixidx].col2.mf * fscale);
+
 }
 
 void PixelShaderManager::SetZTextureTypeChanged()

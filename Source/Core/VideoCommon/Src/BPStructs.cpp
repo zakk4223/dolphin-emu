@@ -168,12 +168,16 @@ void BPWritten(const BPCmd& bp)
 	case BPMEM_IND_MTXA+6:
 	case BPMEM_IND_MTXB+6:
 	case BPMEM_IND_MTXC+6:
-		PixelShaderManager::SetIndMatrixChanged((bp.address - BPMEM_IND_MTXA) / 3);
+		if(bp.changes)
+			PixelShaderManager::SetIndMatrixChanged((bp.address - BPMEM_IND_MTXA) / 3);
 		break;
 	case BPMEM_RAS1_SS0: // Index Texture Coordinate Scale 0
-		PixelShaderManager::SetIndTexScaleChanged(0x03);
+		if(bp.changes)
+			PixelShaderManager::SetIndTexScaleChanged(0x03);
+		break;
 	case BPMEM_RAS1_SS1: // Index Texture Coordinate Scale 1
-		PixelShaderManager::SetIndTexScaleChanged(0x0c);
+		if(bp.changes)
+			PixelShaderManager::SetIndTexScaleChanged(0x0c);
 		break;
 	// ----------------
 	// Scissor Control
