@@ -346,7 +346,7 @@ void BPWritten(const BPCmd& bp)
 	case BPMEM_FOGRANGE+3:
 	case BPMEM_FOGRANGE+4:
 	case BPMEM_FOGRANGE+5:
-		if (!GetConfig(CONFIG_DISABLEFOG))
+		if (!GetConfig(CONFIG_DISABLEFOG) && bp.changes)
 			PixelShaderManager::SetFogRangeAdjustChanged();
 		break;
 	case BPMEM_FOGPARAM0:
