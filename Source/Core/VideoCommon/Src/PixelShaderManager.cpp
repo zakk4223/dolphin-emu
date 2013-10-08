@@ -17,39 +17,6 @@ static int nLightsChanged[2]; // min,max
 PixelShaderConstants PixelShaderManager::constants;
 bool PixelShaderManager::dirty;
 
-inline void SetPSConstant4f(unsigned int const_number, float f1, float f2, float f3, float f4)
-{
-	float4* c = (float4*) &PixelShaderManager::constants;
-	c[const_number][0] = f1;
-	c[const_number][1] = f2;
-	c[const_number][2] = f3;
-	c[const_number][3] = f4;
-	PixelShaderManager::dirty = true;
-}
-
-inline void SetPSConstant4fv(unsigned int const_number, const float *f)
-{
-	float4* c = (float4*) &PixelShaderManager::constants;
-	c[const_number][0] = f[0];
-	c[const_number][1] = f[1];
-	c[const_number][2] = f[2];
-	c[const_number][3] = f[3];
-	PixelShaderManager::dirty = true;
-}
-
-inline void SetMultiPSConstant4fv(unsigned int const_number, unsigned int count, const float *f)
-{
-	float4* c = (float4*) &PixelShaderManager::constants;
-	for(u32 i=0; i<count; i++)
-	{
-		c[const_number+i][0] = f[0 + 4*i];
-		c[const_number+i][1] = f[1 + 4*i];
-		c[const_number+i][2] = f[2 + 4*i];
-		c[const_number+i][3] = f[3 + 4*i];
-	}
-	PixelShaderManager::dirty = true;
-}
-
 void PixelShaderManager::Init()
 {
 	memset(&constants, 0, sizeof(constants));
@@ -113,12 +80,10 @@ void PixelShaderManager::SetConstants(u32 components)
 			for (int i = istart; i < iend; ++i)
 			{
 				u32 color = *(const u32*)(xfmemptr + 3);
-				float NormalizationCoef = 1 / 255.0f;
-				SetPSConstant4f(C_PLIGHTS + 5 * i,
-					((color >> 24) & 0xFF) * NormalizationCoef,
-					((color >> 16) & 0xFF) * NormalizationCoef,
-					((color >> 8)  & 0xFF) * NormalizationCoef,
-					((color)       & 0xFF) * NormalizationCoef);
+				constants.plights[5*i][0] = ((color >> 24) & 0xFF) / 255.0f;
+				constants.plights[5*i][1] = ((color >> 16) & 0xFF) / 255.0f;
+				constants.plights[5*i][2] = ((color >> 8)  & 0xFF) / 255.0f;
+				constants.plights[5*i][3] = ((color)       & 0xFF) / 255.0f;
 				xfmemptr += 4;
 
 				for (int j = 0; j < 4; ++j, xfmemptr += 3)
@@ -127,16 +92,15 @@ void PixelShaderManager::SetConstants(u32 components)
 						fabs(xfmemptr[0]) < 0.00001f &&
 						fabs(xfmemptr[1]) < 0.00001f &&
 						fabs(xfmemptr[2]) < 0.00001f)
-					{
 						// dist attenuation, make sure not equal to 0!!!
-						SetPSConstant4f(C_PLIGHTS+5*i+j+1, 0.00001f, xfmemptr[1], xfmemptr[2], 0);
-					}
+						constants.plights[5*i+j+1][0] = 0.00001f;
 					else
-					{
-						SetPSConstant4fv(C_PLIGHTS+5*i+j+1, xfmemptr);
-					}
+						constants.plights[5*i+j+1][0] = xfmemptr[0];
+					constants.plights[5*i+j+1][1] = xfmemptr[1];
+					constants.plights[5*i+j+1][2] = xfmemptr[2];
 				}
 			}
+			dirty = true;
 
 			nLightsChanged[0] = nLightsChanged[1] = -1;
 		}
