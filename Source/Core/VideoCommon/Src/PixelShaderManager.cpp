@@ -131,14 +131,14 @@ void PixelShaderManager::SetColorChanged(int type, int num, bool high)
 
 void PixelShaderManager::SetAlpha(const AlphaTest& alpha)
 {
-	constants.alpha[0] = alpha.ref0 / 255.0f;
-	constants.alpha[1] = alpha.ref1 / 255.0f;
+	constants.alpha[0] = alpha.ref0;
+	constants.alpha[1] = alpha.ref1;
 	dirty = true;
 }
 
 void PixelShaderManager::SetDestAlpha(const ConstantAlpha& alpha)
 {
-	constants.alpha[3] = alpha.alpha / 255.0f;
+	constants.alpha[3] = alpha.alpha;
 	dirty = true;
 }
 
