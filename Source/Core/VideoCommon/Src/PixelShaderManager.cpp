@@ -113,20 +113,20 @@ void PixelShaderManager::SetConstants(u32 components)
 // TODO: Conversion should be checked in the context of tev_fixes..
 void PixelShaderManager::SetColorChanged(int type, int num, bool high)
 {
-	float4* c = type ? constants.kcolors : constants.colors;
+	int4* c = type ? constants.kcolors : constants.colors;
 	if (!high)
 	{
-		c[num][0] = bpmem.tevregs[num].low.a / 255.0f;
-		c[num][3] = bpmem.tevregs[num].low.b / 255.0f;
+		c[num][0] = bpmem.tevregs[num].low.a;
+		c[num][3] = bpmem.tevregs[num].low.b;
 	}
 	else
 	{
-		c[num][2] = bpmem.tevregs[num].high.a / 255.0f;
-		c[num][1] = bpmem.tevregs[num].high.b / 255.0f;
+		c[num][2] = bpmem.tevregs[num].high.a;
+		c[num][1] = bpmem.tevregs[num].high.b;
 	}
 	dirty = true;
-	
-	PRIM_LOG("pixel %scolor%d: %f %f %f %f\n", type?"k":"", num, c[num][0], c[num][1], c[num][2], c[num][3]);
+
+	PRIM_LOG("pixel %scolor%d: %d %d %d %d\n", type?"k":"", num, c[num][0], c[num][1], c[num][2], c[num][3]);
 }
 
 void PixelShaderManager::SetAlpha(const AlphaTest& alpha)
