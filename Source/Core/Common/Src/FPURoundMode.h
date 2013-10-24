@@ -35,8 +35,8 @@ namespace FPURoundMode
 	void SetRoundMode(u32 mode);
 
 	void SetPrecisionMode(u32 mode);
-	
-	void SetSIMDMode(u32 mode);
+
+	void SetSIMDMode(u32 roundingMode, u32 nonIEEEMode);
 
 /*
  * There are two different flavors of float to int conversion:
