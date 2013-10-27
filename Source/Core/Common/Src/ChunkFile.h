@@ -40,7 +40,7 @@ struct LinkedListItem : public T
 
 // Like std::vector<u8> but without initialization to 0 and some extra methods.
 class PWBuffer
-#if !defined(__APPLE__)
+#if defined(__APPLE__)
 	: public NonCopyable
 #endif
 {
@@ -477,6 +477,9 @@ private:
 
 // Convenience methods for packets.
 class Packet : public PointerWrap
+#ifndef _WIN32
+	, public NonCopyable
+#endif
 {
 public:
 	Packet() : PointerWrap(NULL, MODE_WRITE)
@@ -484,11 +487,21 @@ public:
 		vec = &store;
 	}
 
-	// c++
+#ifdef _WIN32
+	// Even VS2013 still has a STL bug that prevents non-copyable things from
+	// being added to deques.  In addition to the bug where move constructors
+	// don't implicitly delete copy constructors.
+	Packet(const Packet& other_) : PointerWrap(other_), store(other_.store)
+	{
+		vec = &store;
+	}
+#endif
+
 	Packet(Packet&& other_) : PointerWrap(std::move(other_)), store(std::move(other_.store))
 	{
 		vec = &store;
 	}
+
 	void operator=(Packet&& other_)
 	{
 		PointerWrap::operator=(std::move(other_));
