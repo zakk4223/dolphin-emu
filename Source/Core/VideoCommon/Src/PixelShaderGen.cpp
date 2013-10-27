@@ -473,7 +473,8 @@ static inline void GeneratePixelShader(T& out, DSTALPHA_MODE dstAlphaMode, API_T
 			out.Write("\tfloat3 pos = float3(uv0.w,uv1.w,uv7.w);\n");
 		}
 
-		out.Write("\tfloat4 mat, lacc;\n"
+		out.Write("\tfloat4 mat;\n"
+				"\tint4 lacc;\n"
 				"\tfloat3 ldir, h;\n"
 				"\tfloat dist, dist2, attn;\n");
 
