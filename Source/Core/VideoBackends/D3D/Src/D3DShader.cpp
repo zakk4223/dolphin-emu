@@ -39,7 +39,7 @@ bool CompileVertexShader(const char* code, unsigned int len, D3DBlob** blob)
 #endif
 	HRESULT hr = PD3DX11CompileFromMemory(code, len, NULL, NULL, NULL, "main", D3D::VertexShaderVersionString(),
 							flags, 0, NULL, &shaderBuffer, &errorBuffer, NULL);
-	
+
 	if (errorBuffer)
 	{
 		INFO_LOG(VIDEO, "Vertex shader compiler messages:\n%s\n",
@@ -97,7 +97,7 @@ bool CompileGeometryShader(const char* code, unsigned int len, D3DBlob** blob,
 #endif
 	HRESULT hr = PD3DX11CompileFromMemory(code, len, NULL, pDefines, NULL, "main", D3D::GeometryShaderVersionString(),
 							flags, 0, NULL, &shaderBuffer, &errorBuffer, NULL);
-	
+
 	if (errorBuffer)
 	{
 		INFO_LOG(VIDEO, "Geometry shader compiler messages:\n%s\n",
@@ -157,7 +157,7 @@ bool CompilePixelShader(const char* code, unsigned int len, D3DBlob** blob,
 #endif
 	HRESULT hr = PD3DX11CompileFromMemory(code, len, NULL, pDefines, NULL, "main", D3D::PixelShaderVersionString(),
 							flags, 0, NULL, &shaderBuffer, &errorBuffer, NULL);
-	
+
 	if (errorBuffer)
 	{
 		INFO_LOG(VIDEO, "Pixel shader compiler messages:\n%s",

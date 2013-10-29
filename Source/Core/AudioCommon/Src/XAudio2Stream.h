@@ -24,17 +24,17 @@ private:
 
 public:
 	StreamingVoiceContext(IXAudio2 *pXAudio2, CMixer *pMixer, Common::Event& pSyncEvent);
-	
+
 	~StreamingVoiceContext();
-	
+
 	void StreamingVoiceContext::Stop();
 	void StreamingVoiceContext::Play();
-	
+
 	STDMETHOD_(void, OnVoiceError) (THIS_ void* pBufferContext, HRESULT Error) {}
 	STDMETHOD_(void, OnVoiceProcessingPassStart) (UINT32) {}
 	STDMETHOD_(void, OnVoiceProcessingPassEnd) () {}
 	STDMETHOD_(void, OnBufferStart) (void*) {}
-	STDMETHOD_(void, OnLoopEnd) (void*) {}   
+	STDMETHOD_(void, OnLoopEnd) (void*) {}
 	STDMETHOD_(void, OnStreamEnd) () {}
 
 	STDMETHOD_(void, OnBufferEnd) (void* context);
@@ -67,7 +67,7 @@ private:
 	const bool m_cleanup_com;
 
 public:
-	XAudio2(CMixer *mixer) 
+	XAudio2(CMixer *mixer)
 		: SoundStream(mixer)
 		, m_mastering_voice(nullptr)
 		, m_volume(1.0f)
@@ -80,7 +80,7 @@ public:
 		if (m_cleanup_com)
 			CoUninitialize();
 	}
- 
+
 	virtual bool Start();
 	virtual void Stop();
 

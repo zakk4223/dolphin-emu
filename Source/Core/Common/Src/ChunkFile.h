@@ -130,10 +130,10 @@ public:
 	{
 		// Ideally this would be std::is_trivially_copyable, but not enough support yet
 		static_assert(std::is_pod<T>::value, "Only sane for POD types");
-		
+
 		DoVoid((void*)&x, sizeof(x));
 	}
-	
+
 	template <typename T>
 	void DoPOD(T& x)
 	{
@@ -271,7 +271,7 @@ public:
 
 		if (!File::Exists(_rFilename))
 			return false;
-				
+
 		// Check file size
 		const u64 fileSize = File::GetSize(_rFilename);
 		static const u64 headerSize = sizeof(SChunkHeader);
@@ -324,7 +324,7 @@ public:
 		u8* ptr = &buffer[0];
 		PointerWrap p(&ptr, PointerWrap::MODE_READ);
 		_class.DoState(p);
-		
+
 		INFO_LOG(COMMON, "ChunkReader: Done loading %s" , _rFilename.c_str());
 		return true;
 	}

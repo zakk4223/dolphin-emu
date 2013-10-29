@@ -9,7 +9,7 @@
 #include "Common.h"
 #include <vector>
 
-namespace DX11 
+namespace DX11
 {
 
 #define SAFE_RELEASE(x) { if (x) (x)->Release(); (x) = NULL; }

@@ -20,26 +20,26 @@
 // This shouldn't be a global, at least not here.
 SoundStream *soundStream;
 
-namespace AudioCommon 
-{	
-	SoundStream *InitSoundStream(CMixer *mixer, void *hWnd) 
+namespace AudioCommon
+{
+	SoundStream *InitSoundStream(CMixer *mixer, void *hWnd)
 	{
 		// TODO: possible memleak with mixer
 
 		std::string backend = SConfig::GetInstance().sBackend;
-		if (backend == BACKEND_OPENAL           && OpenALStream::isValid()) 
+		if (backend == BACKEND_OPENAL           && OpenALStream::isValid())
 			soundStream = new OpenALStream(mixer);
-		else if (backend == BACKEND_NULLSOUND   && NullSound::isValid()) 
+		else if (backend == BACKEND_NULLSOUND   && NullSound::isValid())
 			soundStream = new NullSound(mixer, hWnd);
-		else if (backend == BACKEND_DIRECTSOUND && DSound::isValid()) 
+		else if (backend == BACKEND_DIRECTSOUND && DSound::isValid())
 			soundStream = new DSound(mixer, hWnd);
-		else if (backend == BACKEND_XAUDIO2     && XAudio2::isValid()) 
+		else if (backend == BACKEND_XAUDIO2     && XAudio2::isValid())
 			soundStream = new XAudio2(mixer);
-		else if (backend == BACKEND_AOSOUND     && AOSound::isValid()) 
+		else if (backend == BACKEND_AOSOUND     && AOSound::isValid())
 			soundStream = new AOSound(mixer);
 		else if (backend == BACKEND_ALSA        && AlsaSound::isValid())
 			soundStream = new AlsaSound(mixer);
-		else if (backend == BACKEND_COREAUDIO   && CoreAudioSound::isValid()) 
+		else if (backend == BACKEND_COREAUDIO   && CoreAudioSound::isValid())
 			soundStream = new CoreAudioSound(mixer);
 		else if (backend == BACKEND_PULSEAUDIO  && PulseAudio::isValid())
 			soundStream = new PulseAudio(mixer);
@@ -68,11 +68,11 @@ namespace AudioCommon
 		return NULL;
 	}
 
-	void ShutdownSoundStream() 
+	void ShutdownSoundStream()
 	{
 		INFO_LOG(DSPHLE, "Shutting down sound stream");
 
-		if (soundStream) 
+		if (soundStream)
 		{
 			soundStream->Stop();
 			if (SConfig::GetInstance().m_DumpAudio)
@@ -82,10 +82,10 @@ namespace AudioCommon
 			soundStream = NULL;
 		}
 
-		INFO_LOG(DSPHLE, "Done shutting down sound stream");	
+		INFO_LOG(DSPHLE, "Done shutting down sound stream");
 	}
 
-	std::vector<std::string> GetSoundBackends() 
+	std::vector<std::string> GetSoundBackends()
 	{
 		std::vector<std::string> backends;
 
@@ -110,7 +110,7 @@ namespace AudioCommon
 		return backends;
 	}
 
-	bool UseJIT() 
+	bool UseJIT()
 	{
 		if (!Movie::IsDSPHLE() && Movie::IsPlayingInput() && Movie::IsConfigSaved())
 		{

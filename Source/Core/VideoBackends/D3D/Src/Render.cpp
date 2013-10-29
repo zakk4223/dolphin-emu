@@ -293,7 +293,7 @@ bool Renderer::CheckForResize()
 
 	// Sanity check
 	if ((client_width != Renderer::GetBackbufferWidth() ||
-		client_height != Renderer::GetBackbufferHeight()) && 
+		client_height != Renderer::GetBackbufferHeight()) &&
 		client_width >= 4 && client_height >= 4)
 	{
 		return true;
@@ -449,7 +449,7 @@ u32 Renderer::AccessEFB(EFBAccessType type, u32 x, u32 y, u32 poke_data)
 		else if (bpmem.zcontrol.pixel_format == PIXELFMT_RGB565_Z16)
 		{
 			ret = RGBA8ToRGB565ToRGBA8(ret);
-		}			
+		}
 		if(bpmem.zcontrol.pixel_format != PIXELFMT_RGBA6_Z24)
 		{
 			ret |= 0xFF000000;
@@ -545,7 +545,7 @@ void Renderer::UpdateViewport(Matrix44& vpCorrection)
 	int Ht = intendedHt;
 	if (Y + Ht > GetTargetHeight())
 		Ht = GetTargetHeight() - Y;
-	
+
 	// If GX viewport is off the render target, we must clamp our viewport
 	// within the bounds. Use the correction matrix to compensate.
 	ViewportCorrectionMatrix(vpCorrection,
@@ -578,7 +578,7 @@ void Renderer::ClearScreen(const EFBRectangle& rc, bool colorEnable, bool alphaE
 
 	// Update the view port for clearing the picture
 	TargetRectangle targetRc = Renderer::ConvertEFBRectangle(rc);
-	D3D11_VIEWPORT vp = CD3D11_VIEWPORT((float)targetRc.left, (float)targetRc.top, (float)targetRc.GetWidth(), (float)targetRc.GetHeight(), 0.f, 1.f); 
+	D3D11_VIEWPORT vp = CD3D11_VIEWPORT((float)targetRc.left, (float)targetRc.top, (float)targetRc.GetWidth(), (float)targetRc.GetHeight(), 0.f, 1.f);
 	D3D::context->RSSetViewports(1, &vp);
 
 	// Color is passed in bgra mode so we need to convert it to rgba
@@ -842,7 +842,7 @@ void Renderer::Swap(u32 xfbAddr, u32 fbWidth, u32 fbHeight,const EFBRectangle& r
 		{
 			xfbSource = xfbSourceList[i];
 			MathUtil::Rectangle<float> sourceRc;
-			
+
 			sourceRc.left = 0;
 			sourceRc.top = 0;
 			sourceRc.right = (float)xfbSource->texWidth;
@@ -1300,7 +1300,7 @@ void Renderer::SetLogicOpMode()
 		D3D11_BLEND_INV_DEST_COLOR,//10
 		D3D11_BLEND_ONE,//11
 		D3D11_BLEND_INV_SRC_COLOR,//12
-		D3D11_BLEND_INV_SRC_COLOR,//13 
+		D3D11_BLEND_INV_SRC_COLOR,//13
 		D3D11_BLEND_INV_DEST_COLOR,//14
 		D3D11_BLEND_ONE//15
 	};
@@ -1319,7 +1319,7 @@ void Renderer::SetLogicOpMode()
 		D3D11_BLEND_INV_DEST_COLOR,//10
 		D3D11_BLEND_INV_DEST_COLOR,//11
 		D3D11_BLEND_INV_SRC_COLOR,//12
-		D3D11_BLEND_ONE,//13 
+		D3D11_BLEND_ONE,//13
 		D3D11_BLEND_INV_SRC_COLOR,//14
 		D3D11_BLEND_ONE//15
 	};
@@ -1370,7 +1370,7 @@ void Renderer::SetSamplerState(int stage, int texindex)
 	const FourTexUnits &tex = bpmem.tex[texindex];
 	const TexMode0 &tm0 = tex.texMode0[stage];
 	const TexMode1 &tm1 = tex.texMode1[stage];
-	
+
 	unsigned int mip = d3dMipFilters[tm0.min_filter & 3];
 
 	if (texindex) stage += 4;

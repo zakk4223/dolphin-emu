@@ -27,12 +27,12 @@ extern struct VideoConfig {
 	bool bSupportSampleShading;
 	GLSL_VERSION eSupportedGLSLVersion;
 	bool bSupportOGL31;
-	
+
 	const char *gl_vendor;
 	const char *gl_renderer;
 	const char* gl_version;
 	const char* glsl_version;
-	
+
 	s32 max_samples;
 } g_ogl_config;
 
@@ -41,7 +41,7 @@ class Renderer : public ::Renderer
 public:
 	Renderer();
 	~Renderer();
-	
+
 	static void Init();
 	static void Shutdown();
 

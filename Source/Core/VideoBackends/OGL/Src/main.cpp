@@ -5,7 +5,7 @@
 
 
 // OpenGL Backend Documentation
-/* 
+/*
 
 1.1 Display settings
 
@@ -181,7 +181,7 @@ bool VideoBackend::Initialize(void *&window_handle)
 	if (!GLInterface->Create(window_handle))
 		return false;
 
-	// Do our OSD callbacks	
+	// Do our OSD callbacks
 	OSD::DoCallbacks(OSD::OSD_INIT);
 
 	s_BackendInitialized = true;
@@ -232,14 +232,14 @@ void VideoBackend::Shutdown()
 {
 	s_BackendInitialized = false;
 
-	// Do our OSD callbacks	
+	// Do our OSD callbacks
 	OSD::DoCallbacks(OSD::OSD_SHUTDOWN);
 
 	GLInterface->Shutdown();
 }
 
 void VideoBackend::Video_Cleanup() {
-	
+
 	if (g_renderer)
 	{
 		s_efbAccessRequested = false;
