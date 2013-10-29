@@ -184,11 +184,11 @@ void LoadPatches()
 
 void ApplyPatches(const std::vector<Patch> &patches)
 {
-	for (const auto& patche : patches)
+	for (const auto& patch : patches)
 	{
-		if (patche.active)
+		if (patch.active)
 		{
-			for (std::vector<PatchEntry>::const_iterator iter2 = patche.entries.begin(); iter2 != patche.entries.end(); ++iter2)
+			for (std::vector<PatchEntry>::const_iterator iter2 = patch.entries.begin(); iter2 != patch.entries.end(); ++iter2)
 			{
 				u32 addr = iter2->address;
 				u32 value = iter2->value;
