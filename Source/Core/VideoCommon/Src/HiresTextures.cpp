@@ -38,9 +38,9 @@ void Init(const char *gameCode)
 			if (entry.isDirectory)
 			{
 				bool duplicate = false;
-				for (auto& Directorie : Directories)
+				for (auto& Directory : Directories)
 				{
-					if (strcmp(Directorie.c_str(), entry.physicalName.c_str()) == 0)
+					if (strcmp(Directory.c_str(), entry.physicalName.c_str()) == 0)
 					{
 						duplicate = true;
 						break;

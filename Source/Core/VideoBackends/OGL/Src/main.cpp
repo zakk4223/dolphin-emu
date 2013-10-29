@@ -110,13 +110,13 @@ void GetShaders(std::vector<std::string> &shaders)
 		File::GetUserPath(D_SHADERS_IDX),
 		File::GetSysDirectory() + SHADERS_DIR DIR_SEP,
 	};
-	for (auto& directorie : directories)
+	for (auto& directory : directories)
 	{
-		if (!File::IsDirectory(directorie))
+		if (!File::IsDirectory(directory))
 			continue;
 
 		File::FSTEntry entry;
-		File::ScanDirectoryTree(directorie, entry);
+		File::ScanDirectoryTree(directory, entry);
 		for (auto& file : entry.children)
 		{
 			std::string name = file.virtualName.c_str();

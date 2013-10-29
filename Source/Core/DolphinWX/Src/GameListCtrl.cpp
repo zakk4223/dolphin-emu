@@ -480,9 +480,9 @@ void CGameListCtrl::ScanForISOs()
 				if (Entry.isDirectory)
 				{
 					bool duplicate = false;
-					for (auto& Directorie : Directories)
+					for (auto& Directory : Directories)
 					{
-						if (strcmp(Directorie.c_str(),
+						if (strcmp(Directory.c_str(),
 									Entry.physicalName.c_str()) == 0)
 						{
 							duplicate = true;
