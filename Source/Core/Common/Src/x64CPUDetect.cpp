@@ -95,6 +95,18 @@ CPUInfo::CPUInfo() {
 	Detect();
 }
 
+static void fxsave(void *data) {
+#ifdef _WIN32
+#ifdef _M_IX86
+	_fxsave(data);
+#elif defined (_M_X64)
+	_fxsave64(data);
+#endif
+#else
+	__asm__("fxsave %0" : "=m" (data));
+#endif
+}
+
 // Detects the various cpu features
 void CPUInfo::Detect()
 {
@@ -169,7 +181,7 @@ void CPUInfo::Detect()
 
 			GC_ALIGNED16(u8 fx_state[512]);
 			memset(fx_state, 0, sizeof(fx_state));
-			__asm__("fxsave %0" : "=m" (fx_state));
+			fxsave(fx_state);
 
 			// lowest byte of MXCSR_MASK
 			if ((fx_state[0x1C] >> 6) & 1)
