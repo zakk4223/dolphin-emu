@@ -222,12 +222,12 @@ bool cdio_is_cdrom(std::string device)
 
 	std::vector<std::string> devices = cdio_get_devices();
 	bool res = false;
-	for (unsigned int i = 0; i < devices.size(); i++)
+	for (auto& devices_i : devices)
 	{
 #ifdef __linux__
 		if (strncmp(devices[i].c_str(), devname, MAX_PATH) == 0)
 #else
-		if (strncmp(devices[i].c_str(), device.c_str(), MAX_PATH) == 0)
+		if (strncmp(devices_i.c_str(), device.c_str(), MAX_PATH) == 0)
 #endif
 		{
 			res = true;

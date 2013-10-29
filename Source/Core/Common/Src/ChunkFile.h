@@ -74,10 +74,10 @@ public:
 		case MODE_WRITE:
 		case MODE_MEASURE:
 		case MODE_VERIFY:
-			for (auto itr = x.begin(); itr != x.end(); ++itr)
+			for (auto& elem : x)
 			{
-				Do(itr->first);
-				Do(itr->second);
+				Do(elem.first);
+				Do(elem.second);
 			}
 			break;
 		}
@@ -90,8 +90,8 @@ public:
 		Do(size);
 		x.resize(size);
 
-		for (auto itr = x.begin(); itr != x.end(); ++itr)
-			Do(*itr);
+		for (auto& elem : x)
+			Do(elem);
 	}
 
 	template <typename T>

@@ -12,16 +12,16 @@
 
 bool BreakPoints::IsAddressBreakPoint(u32 _iAddress)
 {
-	for (TBreakPoints::iterator i = m_BreakPoints.begin(); i != m_BreakPoints.end(); ++i)
-		if (i->iAddress == _iAddress)
+	for (auto& bp : m_BreakPoints)
+		if (bp.iAddress == _iAddress)
 			return true;
 	return false;
 }
 
 bool BreakPoints::IsTempBreakPoint(u32 _iAddress)
 {
-	for (TBreakPoints::iterator i = m_BreakPoints.begin(); i != m_BreakPoints.end(); ++i)
-		if (i->iAddress == _iAddress && i->bTemporary)
+	for (auto& bp : m_BreakPoints)
+		if (bp.iAddress == _iAddress && bp.bTemporary)
 			return true;
 	return false;
 }
@@ -29,14 +29,13 @@ bool BreakPoints::IsTempBreakPoint(u32 _iAddress)
 BreakPoints::TBreakPointsStr BreakPoints::GetStrings() const
 {
 	TBreakPointsStr bps;
-	for (TBreakPoints::const_iterator i = m_BreakPoints.begin();
-		i != m_BreakPoints.end(); ++i)
+	for (const auto& bp : m_BreakPoints)
 	{
-		if (!i->bTemporary)
+		if (!bp.bTemporary)
 		{
-			std::stringstream bp;
-			bp << std::hex << i->iAddress << " " << (i->bOn ? "n" : "");
-			bps.push_back(bp.str());
+			std::stringstream ss;
+			ss << std::hex << bp.iAddress << " " << (bp.bOn ? "n" : "");
+			bps.push_back(ss.str());
 		}
 	}
 
@@ -45,13 +44,13 @@ BreakPoints::TBreakPointsStr BreakPoints::GetStrings() const
 
 void BreakPoints::AddFromStrings(const TBreakPointsStr& bps)
 {
-	for (TBreakPointsStr::const_iterator i = bps.begin(); i != bps.end(); ++i)
+	for (const auto& bps_i : bps)
 	{
 		TBreakPoint bp;
 		std::stringstream bpstr;
-		bpstr << std::hex << *i;
+		bpstr << std::hex << bps_i;
 		bpstr >> bp.iAddress;
-		bp.bOn = i->find("n") != i->npos;
+		bp.bOn = bps_i.find("n") != bps_i.npos;
 		bp.bTemporary = false;
 		Add(bp);
 	}
@@ -115,14 +114,13 @@ void BreakPoints::Clear()
 MemChecks::TMemChecksStr MemChecks::GetStrings() const
 {
 	TMemChecksStr mcs;
-	for (TMemChecks::const_iterator i = m_MemChecks.begin();
-		i != m_MemChecks.end(); ++i)
+	for (const auto& bp : m_MemChecks)
 	{
 		std::stringstream mc;
-		mc << std::hex << i->StartAddress;
-		mc << " " << (i->bRange ? i->EndAddress : i->StartAddress) << " " <<
-			(i->bRange ? "n" : "") << (i->OnRead ? "r" : "") <<
-			(i->OnWrite ? "w" : "") << (i->Log ? "l" : "") << (i->Break ? "p" : "");
+		mc << std::hex << bp.StartAddress;
+		mc << " " << (bp.bRange ? bp.EndAddress : bp.StartAddress) << " " <<
+			(bp.bRange ? "n" : "") << (bp.OnRead ? "r" : "") <<
+			(bp.OnWrite ? "w" : "") << (bp.Log ? "l" : "") << (bp.Break ? "p" : "");
 		mcs.push_back(mc.str());
 	}
 
@@ -131,17 +129,17 @@ MemChecks::TMemChecksStr MemChecks::GetStrings() const
 
 void MemChecks::AddFromStrings(const TMemChecksStr& mcs)
 {
-	for (TMemChecksStr::const_iterator i = mcs.begin(); i != mcs.end(); ++i)
+	for (const auto& mcs_i : mcs)
 	{
 		TMemCheck mc;
 		std::stringstream mcstr;
-		mcstr << std::hex << *i;
+		mcstr << std::hex << mcs_i;
 		mcstr >> mc.StartAddress;
-		mc.bRange	= i->find("n") != i->npos;
-		mc.OnRead	= i->find("r") != i->npos;
-		mc.OnWrite	= i->find("w") != i->npos;
-		mc.Log		= i->find("l") != i->npos;
-		mc.Break	= i->find("p") != i->npos;
+		mc.bRange	= mcs_i.find("n") != mcs_i.npos;
+		mc.OnRead	= mcs_i.find("r") != mcs_i.npos;
+		mc.OnWrite	= mcs_i.find("w") != mcs_i.npos;
+		mc.Log		= mcs_i.find("l") != mcs_i.npos;
+		mc.Break	= mcs_i.find("p") != mcs_i.npos;
 		if (mc.bRange)
 			mcstr >> mc.EndAddress;
 		else
@@ -170,15 +168,15 @@ void MemChecks::Remove(u32 _Address)
 
 TMemCheck *MemChecks::GetMemCheck(u32 address)
 {
-	for (TMemChecks::iterator i = m_MemChecks.begin(); i != m_MemChecks.end(); ++i)
+	for (auto& bp : m_MemChecks)
 	{
-		if (i->bRange)
+		if (bp.bRange)
 		{
-			if (address >= i->StartAddress && address <= i->EndAddress)
-				return &(*i);
+			if (address >= bp.StartAddress && address <= bp.EndAddress)
+				return &(bp);
 		}
-		else if (i->StartAddress == address)
-			return &(*i);
+		else if (bp.StartAddress == address)
+			return &(bp);
 	}
 
 	// none found

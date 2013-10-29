@@ -475,15 +475,15 @@ void CGameListCtrl::ScanForISOs()
 		{
 			File::FSTEntry FST_Temp;
 			File::ScanDirectoryTree(Directories[i], FST_Temp);
-			for (u32 j = 0; j < FST_Temp.children.size(); j++)
+			for (auto& Entry : FST_Temp.children)
 			{
-				if (FST_Temp.children[j].isDirectory)
+				if (Entry.isDirectory)
 				{
 					bool duplicate = false;
-					for (u32 k = 0; k < Directories.size(); k++)
+					for (auto& Directorie : Directories)
 					{
-						if (strcmp(Directories[k].c_str(),
-									FST_Temp.children[j].physicalName.c_str()) == 0)
+						if (strcmp(Directorie.c_str(),
+									Entry.physicalName.c_str()) == 0)
 						{
 							duplicate = true;
 							break;
@@ -491,7 +491,7 @@ void CGameListCtrl::ScanForISOs()
 					}
 					if (!duplicate)
 						Directories.push_back(
-								FST_Temp.children[j].physicalName.c_str());
+								Entry.physicalName.c_str());
 				}
 			}
 		}
@@ -603,10 +603,10 @@ void CGameListCtrl::ScanForISOs()
 	{
 		const std::vector<std::string> drives = cdio_get_devices();
 
-		for (std::vector<std::string>::const_iterator iter = drives.begin(); iter != drives.end(); ++iter)
+		for (const auto& drive : drives)
 		{
 			#ifdef __APPLE__
-			std::auto_ptr<GameListItem> gli(new GameListItem(*iter));
+			std::auto_ptr<GameListItem> gli(new GameListItem(drive));
 			#else
 			std::unique_ptr<GameListItem> gli(new GameListItem(*iter));
 			#endif

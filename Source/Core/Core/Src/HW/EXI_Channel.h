@@ -92,7 +92,7 @@ private:
 		NUM_DEVICES = 3
 	};
 
-	IEXIDevice* m_pDevices[NUM_DEVICES];
+	std::unique_ptr<IEXIDevice> m_pDevices[NUM_DEVICES];
 
 	// Since channels operate a bit differently from each other
 	u32 m_ChannelId;
